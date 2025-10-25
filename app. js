@@ -1,0 +1,68 @@
+import React, { useEffect, useState } from "react";
+import NewsCard from "./NewsCard";
+import "./index.css";
+
+const API_KEY = "2927a2d19b5b0d4af1f9c91b3e957416";
+const URL = `https://gnews.io/api/v4/top-headlines?country=in&lang=en&max=10&token=2927a2d19b5b0d4af1f9c91b3e957416`;
+function App() {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch(URL);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.articles && data.articles.length > 0) {
+          setArticles(data.articles);
+        } else {
+          throw new Error("No articles found. Please try again later.");
+        }
+      } catch (err) {
+        console.error("Error fetching news:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="app-container">
+        <h1 className="title">📰 Latest News Feed</h1>
+        <p>Loading news...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="app-container">
+        <h1 className="title">📰 Latest News Feed</h1>
+        <p style={{ color: "red" }}>⚠️ {error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-container">
+      <h1 className="title">📰 Latest News Feed</h1>
+      <div className="news-grid">
+        {articles.map((item, index) => (
+          <NewsCard key={index} article={item} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default App;
